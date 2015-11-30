@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html>
+
+	<head>
+		<meta charset="utf-8">
+		<meta name="viewport" content="width=device-width,initial-scale=1,minimum-scale=1,maximum-scale=1,user-scalable=no" />
+		<title></title>
+		<link href="css/mui.min.css" rel="stylesheet" />
+
+	</head>
+
+	<body>
+		<header class="mui-bar mui-bar-nav">
+			<a class="mui-action-back mui-icon mui-icon-left-nav mui-pull-left"></a>
+			<h1 class="mui-title">标题</h1>
+		</header>
+		<div class="mui-content">
+			<button style="margin: 3%;" type="button" class="mui-btn mui-btn-blue" onclick="aa()">按钮</button>
+			<div class="mui-scroll">
+				<!--数据列表-->
+				<ul class="mui-table-view" id="aaab">
+					<!--这里插入列表内容-->
+				</ul>
+			</div>
+		</div>
+
+		<script src="js/mui.min.js"></script>
+		<script src="js/bmob-min.js"></script>
+		<script>
+			mui.init();
+			mui.plusReady(function() {
+				Bmob.initialize("2ddb608bcec0f04b389200311dce7ef4", "aab9208610642810731c21ad3d5fc233");
+			});
+
+			function aa() {
+				var GameScore = Bmob.Object.extend("WenZhang");
+				var query = new Bmob.Query(GameScore);
+				var cells = document.body.querySelectorAll('.mui-table-view-cell');				
+				var table = document.body.querySelector('.mui-table-view');			
+				query.ascending("xuhao"); //排序				
+				query.limit(20);// 每次查询返回最多10条数据
+				if (cells.length > 0){
+					console.log('调试：当前列表条数 = ' + cells.length);
+					query.skip(cells.length); // 开始查询条数
+				}
+				query.find({
+					success: function(results) {
+						// 循环处理查询到的数据
+						for (var i = 0; i < results.length; i++) {
+							var object = results[i];								
+							table.insertAdjacentHTML('beforeend', '<li class="mui-table-view-cell mui-media ">' + object.get("biaoti") + "</li>");
+						}
+					},
+					error: function(error) {
+						alert("查询失败: " + error.code + " " + error.message);
+					}
+				});
+			}
+		</script>
+
+	</body>
+
+</html>
