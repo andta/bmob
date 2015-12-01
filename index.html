@@ -6,7 +6,6 @@
 		<meta name="viewport" content="width=device-width,initial-scale=1,minimum-scale=1,maximum-scale=1,user-scalable=no" />
 		<title></title>
 		<link href="css/mui.min.css" rel="stylesheet" />
-
 	</head>
 
 	<body>
@@ -15,7 +14,9 @@
 			<h1 class="mui-title">标题</h1>
 		</header>
 		<div class="mui-content">
-			<button style="margin: 3%;" type="button" class="mui-btn mui-btn-blue" onclick="aa()">按钮</button>
+			<button style="margin: 3%;" type="button" class="mui-btn mui-btn-blue" onclick="chaxue()">查询</button>
+			<button style="margin: 3%;" type="button" class="mui-btn mui-btn-blue" onclick="chuangjian()">创建</button>
+			<button style="margin: 3%;" type="button" class="mui-btn mui-btn-blue" onclick="chaxuedantiao()">查询单条数据</button>
 			<div class="mui-scroll">
 				<!--数据列表-->
 				<ul class="mui-table-view" id="aaab">
@@ -31,31 +32,92 @@
 			mui.plusReady(function() {
 				Bmob.initialize("2ddb608bcec0f04b389200311dce7ef4", "aab9208610642810731c21ad3d5fc233");
 			});
+			/*
+			 * 添加数据，如果表或字段不存在就创建
+			 */
+			function chuangjian() {
+				var wa =plus.nativeUI.showWaiting("处理中，请等待...\n5",{back:"none"});
+				
+				for (var i = 1; i < 1000; i++) {
+				// 创建Bmob.Object子类
+				var db = Bmob.Object.extend("bmob_db_wenZhang");
+				// 创建该类的一个实例
+				var mydb = new db();
+				// 添加数据，第一个入口参数是Json数据
 
-			function aa() {
-				var GameScore = Bmob.Object.extend("WenZhang");
-				var query = new Bmob.Query(GameScore);
-				var cells = document.body.querySelectorAll('.mui-table-view-cell');				
-				var table = document.body.querySelector('.mui-table-view');			
-				query.ascending("xuhao"); //排序				
-				query.limit(20);// 每次查询返回最多10条数据
-				if (cells.length > 0){
-					console.log('调试：当前列表条数 = ' + cells.length);
-					query.skip(cells.length); // 开始查询条数
-				}
+					mydb.save({
+						//db_key: 133,
+						db_title: "标题" + i,
+						db_description: "描述",	//描述
+						db_details: "详情",
+						db_image: "图片",
+						db_userId: "bmob",
+						db_collectionCount: 17,	//收藏
+						db_readCount: 13,		//阅读
+						db_commentCount: 12		//评论
+					}, {
+						success: function(results) {
+							// 添加成功
+//							console.log('添加数据成功，返回的objectId是：' + results.id);
+						},
+						error: function(results, error) {
+							// 添加失败
+							console.log('添加数据失败，返回错误信息：' + error.description);
+						}
+					});
+				}				
+				wa.close();
+			}
+			/*
+			 * 查询数据
+			 */
+			function chaxue() {
+				var cells = document.body.querySelectorAll('.mui-table-view-cell'); //获取所有li元素			
+				var table = document.body.querySelector('.mui-table-view'); //获取Ui元素	
+				console.log('调试：当前列表条数 = ' + cells.length);
+				var db = Bmob.Object.extend("bmob_db_wenZhang"); //创建新的Bmob.Object子类
+				var query = new Bmob.Query(db);
+				query.ascending("db_key"); //升序排列
+				query.skip(cells.length); // 开始查询条数
+				query.limit(1000); // 每次查询返回最多10条数据			
 				query.find({
 					success: function(results) {
 						// 循环处理查询到的数据
 						for (var i = 0; i < results.length; i++) {
-							var object = results[i];								
-							table.insertAdjacentHTML('beforeend', '<li class="mui-table-view-cell mui-media ">' + object.get("biaoti") + "</li>");
+							var object = results[i];
+							table.insertAdjacentHTML('beforeend', '<li class="mui-table-view-cell mui-media ">' + object.get("db_title") + "</li>");
 						}
 					},
 					error: function(error) {
-						alert("查询失败: " + error.code + " " + error.message);
+						mui.toast("抱歉，无法获取数据！");
+						console.log('调试：查询失败  = ' + error.code + " " + error.message);
 					}
 				});
 			}
+			/*
+			 * 查询一条数据
+			 */
+			function chaxuedantiao() {
+				var GameScore = Bmob.Object.extend("GameScore");
+				//创建查询对象，入口参数是对象类的实例
+				var query = new Bmob.Query(GameScore);
+				//查询单条数据，第一个参数是这条数据的objectId值
+				query.get("63cc8f8d9e", {
+					success: function(gameScore) {
+						// 查询成功，调用get方法获取对应属性的值
+						var score = gameScore.get("score");
+						var playerName = gameScore.get("playerName");
+						var cheatMode = gameScore.get("cheatMode");
+						console.log('调试：查询到的数据为  = ' + cheatMode);
+					},
+					error: function(object, error) {
+						// 查询失败
+					}
+				});
+			}
+			
+			
+			
 		</script>
 
 	</body>
